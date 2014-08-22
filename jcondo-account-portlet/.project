@@ -3,6 +3,7 @@
 	<name>jcondo-account-portlet</name>
 	<comment></comment>
 	<projects>
+		<project>jcondo-api</project>
 	</projects>
 	<buildSpec>
 		<buildCommand>

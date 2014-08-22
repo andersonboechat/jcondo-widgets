@@ -6,22 +6,29 @@ import javax.faces.model.ListDataModel;
 
 import org.primefaces.model.SelectableDataModel;
 
-import br.com.abware.jcondo.core.model.Person;
+import br.com.abware.jcondo.core.Organization;
 
-public class PersonDataModel extends ListDataModel<Person> implements SelectableDataModel<Person> {
+public class PersonDataModel extends ListDataModel<PersonData> implements SelectableDataModel<PersonData> {
 
-	public PersonDataModel(List<Person> data) {
+	private Organization organization;
+	
+	public PersonDataModel(Organization organization, List<PersonData> data) {
+		super(data);
+		this.organization = organization;
+	}
+	
+	public PersonDataModel(List<PersonData> data) {
 		super(data);
 	}
 	
 	@Override
 	@SuppressWarnings("unchecked")
-	public Person getRowData(String rowKey) {
-		List<Person> people = (List<Person>) getWrappedData();
+	public PersonData getRowData(String rowKey) {
+		List<PersonData> datas = (List<PersonData>) getWrappedData();
 		
-		for (Person person : people) {
-			if (person.getId() == Long.parseLong(rowKey)) {
-				return person;
+		for (PersonData data : datas) {
+			if (String.valueOf(getRowKey(data)).equals(rowKey)) {
+				return data;
 			}
 		}
 		
@@ -29,14 +36,32 @@ public class PersonDataModel extends ListDataModel<Person> implements Selectable
 	}
 
 	@Override
-	public Object getRowKey(Person person) {
-		return person.getId();
+	public Object getRowKey(PersonData data) {
+		return data.getPerson().getId();
 	}
 	
 	@SuppressWarnings("unchecked")
-	public void add(Person person) {
-		List<Person> people = (List<Person>) getWrappedData();
-		people.add(person);
+	public void add(PersonData data) {
+		List<PersonData> datas = (List<PersonData>) getWrappedData();
+		datas.add(data);
 	}
 
+	@Override
+	public boolean equals(Object obj) {
+		if (super.equals(obj)) {
+			return true;
+		}
+		try {
+			PersonDataModel model = (PersonDataModel) obj;
+			if (this.organization.equals(model.getOrganization())) {
+				return true;
+			}
+		} catch (Exception e) {}
+
+		return false;
+	}
+
+	public Organization getOrganization() {
+		return organization;
+	}
 }

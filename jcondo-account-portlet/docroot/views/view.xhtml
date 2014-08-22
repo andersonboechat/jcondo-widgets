@@ -159,10 +159,11 @@
 					    </p:column>
 
 					    <p:column id="role" headerText="Tipo" style="width:20%">
-							<p:selectOneMenu id="sel1" value="#{person.role.id}" style="width:100%" disabled="#{accountBean.hasPermission(person) == false}">  
+							<p:selectOneMenu id="sel1" value="#{accountBean.getRole(person)}" valueChangeListener="#{accountBean.onSelectRole}" 
+								style="width:100%" disabled="#{accountBean.hasPermission(person) == false}">  
 								<f:selectItems value="#{accountBean.flatRoles}" 
 												var="role" itemLabel="#{role.title}" itemValue="#{role.id}" />
-								<p:ajax event="valueChange" update=":outputMsg"/>
+								<p:ajax event="change" update=":outputMsg"/>
 							</p:selectOneMenu>
 					    </p:column>
 

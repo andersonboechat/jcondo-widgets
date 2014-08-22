@@ -15,6 +15,7 @@ import javax.faces.bean.ManagedBean;
 import javax.faces.bean.ViewScoped;
 import javax.faces.context.FacesContext;
 import javax.faces.event.AjaxBehaviorEvent;
+import javax.faces.event.ValueChangeEvent;
 import javax.portlet.PortletContext;
 
 import org.apache.commons.collections.CollectionUtils;
@@ -56,16 +57,25 @@ public class AccountBean implements Serializable {
 
 	private PersonDataModel model;
 
+	private List<PersonDataModel> models;
+
+	/** apartamento selecionado */
 	private Flat flat;
 	
+	/** apartamentos associados ao usuário logado */
 	private List<Flat> flats;
 
+	/** usuario logado */
 	private Person person;
 	
+	private PersonData data;
+	
+	/** usuario sendo alterado ou criado */
 	private Person flatPerson;
 	
 	private List<Person> flatPeople;
 	
+	/** papeis possiveis para um apartamento */
 	private List<Role> flatRoles;
 
 	@PostConstruct
@@ -73,20 +83,31 @@ public class AccountBean implements Serializable {
 		try {
 			person = personService.getPerson();
 			flats = flatService.getFlats(person);
-			flat = flats.get(0);
 
 			if (!CollectionUtils.isEmpty(flats)) {
 				flat = flats.get(0);
-				setModel(new PersonDataModel(personService.getPeople(flat)));
-				//TODO roles = selectedFlat.getRoles();
+				buildModel();
 			} else {
-				setModel(new PersonDataModel(new ArrayList<Person>()));
+				//setModel(new PersonDataModel(new ArrayList<Person>()));
 			}
 
 			flatRoles = roleService.getRoles(RoleType.FLAT_ROLE);
+
 		} catch (ApplicationException e) {
 			LOGGER.fatal("Falha ao inicializar bean", e);
 		}
+	}
+	
+	@SuppressWarnings("unchecked")
+	private void buildModel() throws ApplicationException {
+		List<PersonData> datas = new ArrayList<PersonData>();
+
+		for (Person person : personService.getPeople(flat)) {
+			datas.add(new PersonData(person, flat, roleService.getRole(person, flat)));
+		}
+
+		model = new PersonDataModel(flat, datas);
+		models.add(model);
 	}
 
 	public boolean canAddPeople() {
@@ -109,11 +130,27 @@ public class AccountBean implements Serializable {
 		return false;
 	}
 
+	public void onSelectRole(ValueChangeEvent event) {
+		Role role = (Role) event.getNewValue();
+		Person person = model.getRowData().getPerson();
+		try {
+			roleService.save(person, role);
+		} catch (ApplicationException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
+	
 	public void onSelectFlat(AjaxBehaviorEvent event) {
 		try {
-			//event.getSource();
-			//flat = flats.get(flats.indexOf(null));
-			model.setWrappedData(personService.getPeople(flat));
+			int i;
+
+			if ((i = models.indexOf(new PersonDataModel(flat, null))) < 0) {
+				buildModel();
+			} else {
+				model.setWrappedData(models.get(i));
+			}
+
 		} catch (Exception e) {
 			LOGGER.error("Unexpected Failure", e);
 			MessageUtils.addMessage(FacesMessage.SEVERITY_FATAL, "register.runtime.failure", null);
@@ -122,11 +159,12 @@ public class AccountBean implements Serializable {
 	
 	public void onSave(AjaxBehaviorEvent event) {
 		try {
-			boolean isNew = flatPerson.getId() == 0 ? true : false; 
-			flatPerson = personService.save(flatPerson);
-			
+			boolean isNew = data.getPerson().getId() == 0 ? true : false; 
+			Person person = personService.register(data.getPerson());
+			data.setPerson(person);
+
 			if (isNew) {
-				model.add(flatPerson);
+				model.add(data);
 				MessageUtils.addMessage(FacesMessage.SEVERITY_INFO, "flats.user.add.success", null);
 			} else {
 				MessageUtils.addMessage(FacesMessage.SEVERITY_INFO, "global.sucess", null);
@@ -142,12 +180,13 @@ public class AccountBean implements Serializable {
 	}
 
 	public void onCreate() {
-		flatPerson = new Person();
+		//flatPerson = new Person();
+		data = new PersonData(new Person(), flat, null);
 	}
 
-	public void onEdit(String userId) {
+	public void onEdit(String rowKey) {
 		try {
-			flatPerson = model.getRowData(userId);
+			data = model.getRowData(rowKey);
 		} catch (Exception e) {
 			LOGGER.error("Unexpected Failure", e);
 			MessageUtils.addMessage(FacesMessage.SEVERITY_FATAL, "register.runtime.failure", null);

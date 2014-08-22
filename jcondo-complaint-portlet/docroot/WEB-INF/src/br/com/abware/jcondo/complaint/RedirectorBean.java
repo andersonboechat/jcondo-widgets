@@ -1,4 +1,4 @@
-package br.com.abware.jcondo.booking;
+package br.com.abware.jcondo.complaint;
 
 import java.io.IOException;
 
@@ -13,7 +13,7 @@ public class RedirectorBean {
 	private String windowState;
 	
 	public void redirect(String windowState) throws IOException {
-		FacesContext.getCurrentInstance().getExternalContext().redirect("/jcondo-booking-portlet/views/" + windowState + ".xhtml");
+		FacesContext.getCurrentInstance().getExternalContext().redirect("/jcondo-complaint-portlet/views/" + windowState + ".xhtml");
 		
 	}
 
