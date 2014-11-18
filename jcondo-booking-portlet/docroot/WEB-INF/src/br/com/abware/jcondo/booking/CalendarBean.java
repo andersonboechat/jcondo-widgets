@@ -17,11 +17,12 @@ import javax.faces.component.UIInput;
 import javax.faces.context.FacesContext;
 import javax.faces.event.PhaseId;
 import javax.faces.validator.ValidatorException;
+import javax.interceptor.Interceptors;
 
+import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.configuration.ConfigurationException;
 import org.apache.commons.configuration.PropertiesConfiguration;
 import org.apache.log4j.Logger;
-import org.apache.myfaces.commons.util.MessageUtils;
 import org.primefaces.event.DateSelectEvent;
 import org.primefaces.model.DefaultScheduleEvent;
 import org.primefaces.model.DefaultStreamedContent;
@@ -38,9 +39,11 @@ import br.com.abware.jcondo.booking.service.RoomService;
 import br.com.abware.jcondo.core.model.Person;
 import br.com.abware.jcondo.core.service.PersonService;
 import br.com.abware.jcondo.exception.ApplicationException;
+import br.com.abware.jcondo.exception.ExceptionHandler;
 
-@ViewScoped
 @ManagedBean
+@ViewScoped
+@Interceptors(value={ExceptionHandler.class})
 public class CalendarBean implements Serializable {
 
 	private static final long serialVersionUID = 1L;
@@ -88,13 +91,16 @@ public class CalendarBean implements Serializable {
 				initModel();
 			}
 	
-			if (rooms == null || rooms.isEmpty()) {
+			if (CollectionUtils.isEmpty(rooms)) {
 				rooms = roomService.getRooms();
 			}
-	
-			room = rooms.get(0);
+
+			if (CollectionUtils.isNotEmpty(rooms)) {
+				room = rooms.get(0);	
+			}
+
 		} catch (ApplicationException e) {
-			LOGGER.fatal("Falha ao inicializar bean", e);
+			LOGGER.fatal("Bean initialization failure", e);
 		}
 	}
 
@@ -140,20 +146,15 @@ public class CalendarBean implements Serializable {
 		bookingDate = e.getDate();
 	}
 	
-	public void onBooking() {
-		try {
-			if (deal) {
-				RoomBooking booking = roomBookingService.book(person, room, bookingDate);
-				personBookings.add(booking);
-				model.addEvent(new DefaultScheduleEvent(String.valueOf(booking.getId()), 
-														bookingDate, bookingDate, getRoomStyleClass(room)));
-				room = null;
-				bookingDate = null;
-				deal = false;				
-			}
-		} catch (Exception e) {
-			LOGGER.error("Unexpected Failure", e);
-			MessageUtils.addMessage(FacesMessage.SEVERITY_FATAL, "register.runtime.failure", null);
+	public void onBooking() throws ApplicationException {
+		if (deal) {
+			RoomBooking booking = roomBookingService.book(person, room, bookingDate);
+			personBookings.add(booking);
+			model.addEvent(new DefaultScheduleEvent(String.valueOf(booking.getId()), 
+													bookingDate, bookingDate, getRoomStyleClass(room)));
+			room = null;
+			bookingDate = null;
+			deal = false;				
 		}
 	}
 
@@ -162,36 +163,20 @@ public class CalendarBean implements Serializable {
 	}
 	
 	public void onCancel() {
-		try {
-			
-		} catch (Exception e) {
-			// TODO: handle exception
-		}
-	}
-	
-	public void onCancelBooking(Integer index) {
-		try {
-			RoomBooking booking = personBookings.get(index);
-			roomBookingService.cancel(booking);
-			personBookings.remove(booking);
-			model.deleteEvent(model.getEvent(String.valueOf(booking.getId())));
-		} catch (Exception e) {
-			LOGGER.error("Unexpected Failure", e);
-			MessageUtils.addMessage(FacesMessage.SEVERITY_FATAL, "register.runtime.failure", null);
-		}
-	}
-	
-	public boolean bookingExists(String roomId) {
-		try {
-            Room room = new Room();
-            room.setId(Integer.valueOf(roomId));
-			return roomBookingService.exists(room, bookingDate);
-		} catch (Exception e) {
-			LOGGER.error("Unexpected Failure", e);
-			MessageUtils.addMessage(FacesMessage.SEVERITY_FATAL, "register.runtime.failure", null);
-		}
 
-		return false;
+	}
+	
+	public void onCancelBooking(Integer index) throws ApplicationException {
+		RoomBooking booking = personBookings.get(index);
+		roomBookingService.cancel(booking);
+		personBookings.remove(booking);
+		model.deleteEvent(model.getEvent(String.valueOf(booking.getId())));
+	}
+	
+	public boolean bookingExists(String roomId) throws ApplicationException {
+        Room room = new Room();
+        room.setId(Integer.valueOf(roomId));
+		return roomBookingService.exists(room, bookingDate);
 	}
 	
 	public void validateCheckbox(FacesContext context, UIComponent component, Object value) {  
