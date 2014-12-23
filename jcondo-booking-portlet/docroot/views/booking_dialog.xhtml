@@ -6,47 +6,51 @@
 	xmlns:h="http://java.sun.com/jsf/html"
 	xmlns:p="http://primefaces.org/ui"
 	xmlns:ui="http://java.sun.com/jsf/facelets">
-	<h:form id="booking-dialog-form">
-		<p:dialog widgetVar="bookingDialog" header="#{msg['booking.dialog.header']}" styleClass="agenda" modal="true" resizable="false" showEffect="fade" hideEffect="fade" style="z-index: 99999999999;">
-			<p:growl id="growl" severity="warn,error,fatal"/> 
-			<h:panelGrid id="bookingDetails" columns="1">
-				<h:outputLabel for="selectedDate" value="Os seguintes espaços estão disponíveis para o dia " />
-				<p:inputMask id="selectedDate" value="#{calendarBean.bookingDate}" mask="99/99/9999" widgetVar="selectedDate">
-					<f:convertDateTime pattern="dd/MM/yyyy" />
-				</p:inputMask>
+	<h:form id="booking-dialog-form-#{tabIndex}">
+		<p:dialog widgetVar="bookingDialog-#{tabIndex}" header="#{msg['bkg.dlg.hdr']}" styleClass="agenda" modal="true" resizable="false" showEffect="fade" hideEffect="fade">
+			<p:growl id="growl" severity="warn,error,fatal" sticky="true"/> 
+			<h:panelGrid id="bookingDetails-#{tabIndex}" columns="1">
+				<h:panelGrid columns="3" style="width: 900px; overflow: hidden; margin: 15px 0px 15px 0px; " styleClass="agenda" columnClasses="left2,middle,right2">
+					<h:panelGrid columns="1">
+						<h:outputText value="#{msg['bkg.dlg.lbl.room']}: #{calendarBean.room.name} "/>
+						<h:outputText value="#{calendarBean.bookingDate}">
+							<f:convertDateTime pattern="'#{msg['bkg.dlg.lbl.day']}:' dd/MM/yyyy" />
+						</h:outputText>
+					</h:panelGrid>
+					
+					<h:selectOneMenu required="true" requiredMessage="#{msg['bkg.dlg.msg.flat.required']}">
+						<f:selectItem itemValue="-1" itemLabel="#{msg['bkg.dlg.lbl.flat']}" noSelectionOption="true"/>
+						<f:selectItems value="#{calendarBean.flats}" var="flat" itemLabel="#{flat.name}" itemValue="#{flat.id}"/>
+						<p:ajax event="change" listener="#{calendarBean.onFlatSelect}" update="residents"></p:ajax>
+					</h:selectOneMenu>
 	
-				<p:selectOneRadio id="roomId" value="#{calendarBean.roomId}" layout="custom" required="true" requiredMessage="#{msg['room.not.selected']}">
-					<f:selectItems var="selectedRoom" value="#{calendarBean.rooms}" itemValue="${selectedRoom.id}" />
-				</p:selectOneRadio>
-	
-				<h:panelGrid columns="#{calendarBean.rooms.size() * 2}" style="width: 850px; height: 100px;">
-					<c:forEach var="aRoom" items="#{calendarBean.rooms}" varStatus="i">
-						<p:radioButton id="opt${i.index}" for="roomId" itemIndex="${i.index}" disabled="#{calendarBean.bookingExists(aRoom.getId())}"/>
-						<h:outputLabel for="opt${i.index}" value="${aRoom.name}" styleClass="#{calendarBean.getRoomStyleClass(aRoom.getId())}"/>								
-					</c:forEach>
+					<h:selectOneMenu id="residents" required="true" requiredMessage="#{msg['bkg.dlg.msg.resident.required']}" style="width: 250px;">
+						<f:selectItem itemValue="-1" itemLabel="#{msg['bkg.dlg.lbl.resident']}" noSelectionOption="true"/>
+						<f:selectItems value="#{calendarBean.flat.users}" var="user" itemLabel="#{user.fullName}" itemValue="#{user.userId}"/>
+						<p:ajax event="change" listener="#{calendarBean.onResidentSelect}"></p:ajax>
+					</h:selectOneMenu>
 				</h:panelGrid>
-	
-				<h:outputLabel for="agreement" value="#{msg['agreement.term']}" style="padding-left: 35%; font-size: 18px;"/>
-				<p:media id="agreement" value="/Convencao_Ventanas.pdf" width="850px" height="350px" style="margin-bottom: 10px;">  
-					<h:outputText value="#{msg['media.not.supported']}" escape="false"/>
-				</p:media> 
-	
-				<p:selectBooleanCheckbox id="deal" value="#{calendarBean.deal}" 
-					itemLabel="#{msg['agreement.deal']}" 
-					validator="#{calendarBean.validateCheckbox}"
-					validatorMessage="#{msg['agreement.deal.unchecked']}"/>
-				
-				<h:panelGrid columns="2" style="width: 600px; height: 30px;overflow: hidden; margin: 20px 0px 20px 0px">
-					<p:column>
-						<h:outputLabel for="password" value="#{msg.password}:"/>
-						<h:inputSecret id="password" value="#{calendarBean.password}" required="true" requiredMessage="#{msg['password.not.informed']}"/>
-					</p:column>
-					<p:column>
-						<p:commandButton id="cancelBookingBtn" value="#{msg.cancel}" actionListener="#{calendarBean.onCancel}" oncomplete="bookingDialog.hide()" partialSubmit="true" process="@this" global="false"/>
-						<p:commandButton id="bookingBtn" value="#{msg.booking}" actionListener="#{calendarBean.onBooking}" oncomplete="if (!args.validationFailed) {calendar.update();bookingDialog.hide();}" update="growl"/>
-					</p:column>
+
+				<h:outputLabel for="agreement" value="#{msg['bkg.dlg.hdr.agreement']}" style="padding-left: 35%; font-size: 18px;"/>
+
+				<p:media id="agreement" width="900px" height="350px" style="margin-bottom: 10px;" value="#{calendarBean.showAgreement(roomId)}" player="pdf">  
+					<h:outputText value="#{msg['bkg.dlg.msg.media.not.supported']}" escape="false"/>
+				</p:media>
+
+				<p:selectBooleanCheckbox id="deal" value="#{calendarBean.deal}" itemLabel="#{msg['bkg.dlg.lbl.deal.aware']}" validator="#{calendarBean.validateCheckbox}" validatorMessage="#{msg['bkg.dlg.msg.agreement.required']}"/>
+
+				<h:panelGrid columns="2" style="float: right; height: 30px; overflow: hidden; margin: 20px 0px 10px 0px;">
+					<p:commandButton id="bookingConfirmBtn" value="#{msg['bkg.dlg.btn.book']}" actionListener="#{calendarBean.onBooking(tabIndex)}" rendered="#{not(calendarBean.isCancelEnable())}" oncomplete="PF('calendar-#{tabIndex}').update(); PF('bookingDialog-#{tabIndex}').hide();" style="margin: 0px 5px; width: 85px">
+						<p:confirm header="#{msg['bkg.dlg.cfm.header']}" message="#{msg['bkg.dlg.cfm.msg']}" icon="ui-icon-alert"/>
+					</p:commandButton>
+					<p:commandButton id="bookingBtn" value="#{msg['bkg.dlg.btn.book']}" actionListener="#{calendarBean.onBooking(tabIndex)}" rendered="#{calendarBean.isCancelEnable()}" oncomplete="if (!args.validationFailed) {if(PF('calendar-#{tabIndex}').update) {PF('calendar-#{tabIndex}').update()} PF('bookingDialog-#{tabIndex}').hide();" style="margin: 0px 5px; width: 85px"/>
+					<p:commandButton id="cancelBookingBtn" value="#{msg['bkg.dlg.btn.cancel']}" type="button" onclick="PF('bookingDialog-#{tabIndex}').hide();" global="false" style="margin: 0px 0px 0px 5px; width: 85px"/>
 				</h:panelGrid>
 			</h:panelGrid>
 		</p:dialog>
+		<p:confirmDialog global="true" width="600" style="padding: 0px" showEffect="fade" hideEffect="fade" visible="false">
+			<p:commandButton value="#{msg['bkg.dlg.cfm.not.book']}" type="button" styleClass="ui-confirmdialog-no" icon="ui-icon-close" style="float: left; width: 200px; margin-left: 14%" />
+			<p:commandButton value="#{msg['bkg.dlg.cfm.book']}" type="button" styleClass="ui-confirmdialog-yes" icon="ui-icon-check" style="float: right; width: 200px; margin-right: 14%"/>
+		</p:confirmDialog>
 	</h:form>
 </f:view>

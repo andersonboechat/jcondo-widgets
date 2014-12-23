@@ -17,10 +17,7 @@
 		</script>
 	</h:head>
 	<h:body>
-		#{calendarBean.onLoad()}
-
 		<f:loadBundle basename="Language_pt_BR" var="msg"/>
-		<p:blockUI block="grid" trigger="agenda-form:calendar" />
 
 		<p:ajaxStatus id="agenda-status" style="width: 250px;text-align: center; position:absolute; right: 20%; top: 20%; border: 0px solid black; z-index: 99999999999999">
 			<f:facet name="start">
@@ -34,28 +31,27 @@
 			</f:facet>
 		</p:ajaxStatus>
 
-		<h:panelGrid id="grid" columns="2" style="width: 100%" styleClass="agenda" columnClasses="left,right">
-			<p:column style="border: none !important">
-				<h:form id="agenda-form">
-					<p:schedule id="calendar" value="#{calendarBean.model}" editable="true" widgetVar="calendar" 
-								locale="pt" draggable="false" resizable="false" styleClass="agenda" aspectRatio="0.9" 
-								leftHeaderTemplate="prev" centerHeaderTemplate="title" rightHeaderTemplate="next">
-						<p:ajax event="dateSelect" listener="#{calendarBean.onDateSelect}" 
-								update=":booking-dialog-form:bookingDetails" oncomplete="if (teste(selectedDate)) bookingDialog.show()"  />
-					</p:schedule>
-				</h:form>
-			</p:column>
-			<p:column>
-				<p:fieldset legend="Espaços" styleClass="agenda">
-					<ui:include src="rooms.xhtml"/>
-				</p:fieldset>
-				<br/><br/>
-				<p:fieldset legend="Meus Alugueis" styleClass="agenda">
-					<ui:include src="bookings.xhtml"></ui:include>
-				</p:fieldset>
-			</p:column>
-		</h:panelGrid>
-		<ui:include src="booking_dialog.xhtml"></ui:include>
-		<ui:include src="rooms_dialog.xhtml"></ui:include>	
+		<p:tabView id="tab" styleClass="agenda" style="font-style: normal;" activeIndex="0" cache="false">
+			<p:tab title="Reservas">
+				<p:tabView id="tabs">
+					<p:ajax event="tabChange" listener="#{calendarBean.onTabChange}"/>
+					<c:forEach var="room" items="#{calendarBean.rooms}" varStatus="i">
+						<p:tab id="tab-${i.index}" title="${room.name}">
+							<h:panelGrid columns="2">
+								<ui:include src="calendar.xhtml"><ui:param name="tabIndex" value="#{i.index}"/></ui:include>
+								<ui:include src="room.xhtml"><ui:param name="tabIndex" value="#{i.index}"/></ui:include>
+							</h:panelGrid>
+							<ui:include src="booking_dialog.xhtml">
+								<ui:param name="tabIndex" value="#{i.index}"/>
+								<ui:param name="roomId" value="#{room.id}"/>
+							</ui:include>
+							<ui:include src="event_dialog.xhtml"><ui:param name="tabIndex" value="#{i.index}"/></ui:include>
+						</p:tab>
+					</c:forEach>
+				</p:tabView>
+			</p:tab>
+			<p:tab title="Relatórios">
+			</p:tab>
+		</p:tabView>
 	</h:body>
 </f:view>
