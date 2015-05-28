@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+
+<f:view xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:c="http://java.sun.com/jsp/jstl/core"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:p="http://primefaces.org/ui"
+	xmlns:ui="http://java.sun.com/jsf/facelets">
+	<h:form id="event-dialog-form-#{tabIndex}">
+		<p:dialog widgetVar="eventDialog-#{tabIndex}" header="#{msg['evt.dlg.hdr']}" modal="true" resizable="false" showEffect="fade" hideEffect="fade" style="height: 700px;" width="500px">
+			<p:growl id="growl" severity="warn,error,fatal"/> 
+			<h:panelGrid id="eventDetails-#{tabIndex}" columns="1" style="width: 100%">
+				<h:panelGrid columns="2" style="width: 100%; border: 0px solid black" columnClasses="left3,right3">
+					<h:outputLabel value="#{msg['evt.dlg.lbl.room']}"/>
+					<h:outputText value="#{scheduleBean.booking.room.name}"/>
+					<h:outputLabel value="#{msg['evt.dlg.lbl.date']}"/>
+					<h:outputText value="#{scheduleBean.booking.date}"><f:convertDateTime pattern="EEEEE, dd/MM/yyyy" /></h:outputText>
+					<h:outputLabel value="#{msg['evt.dlg.lbl.time']}"/>
+					<h:panelGrid columns="2">
+						<h:outputText value="#{scheduleBean.booking.dateIn}"><f:convertDateTime pattern="'#{msg['evt.dlg.lbl.time.from']}' HH:mm'h'" /></h:outputText>
+						<h:outputText value="#{scheduleBean.booking.dateOut}"><f:convertDateTime pattern="'#{msg['evt.dlg.lbl.to']}' HH:mm'h'" /></h:outputText>
+					</h:panelGrid>
+					<h:outputLabel value="#{msg['evt.dlg.lbl.flat']}"/>
+					<h:outputText value="#{scheduleBean.booking.flat.name}"/>
+					<h:outputLabel value="#{msg['evt.dlg.lbl.resident']}"/>
+					<h:outputText value="#{scheduleBean.booking.person.fullName}"/>
+				</h:panelGrid>
+				<h:panelGrid columns="2" style="width: 100%; overflow: hidden; margin: 20px 0px 20px 0px;">
+					<h:outputText value="#{msg['evt.dlg.msg.deadline']}" escape="false" style="float:left; font-size: 10px; font-weight: bold; margin: 0px 5px 5px;" rendered="#{not(scheduleBean.isCancelEnable())}"/>
+					<p:commandButton id="cancelBookingBtn" value="#{msg['evt.dlg.btn.cancel']}" actionListener="#{scheduleBean.onCancel}" oncomplete="if (!args.validationFailed) {if(PF('calendar-#{tabIndex}').update) {PF('calendar-#{tabIndex}').update();} PF('eventDialog-#{tabIndex}').hide();}" update="growl" style="float: right; margin: 0px 5px 5px; width: 145px" rendered="#{scheduleBean.isCancelEnable()}"/>
+					<p:commandButton id="closeBtn" type="button" value="#{msg['evt.dlg.btn.close']}" onclick="PF('eventDialog-#{tabIndex}').hide();" style="float: left; margin: 0px 0px 5px 5px; width: 145px" global="false" />
+				</h:panelGrid>
+			</h:panelGrid>
+		</p:dialog>
+	</h:form>
+</f:view>

@@ -86,51 +86,12 @@
 		</style>
 	</h:head>
 	<h:body>
+		<f:loadBundle basename="Language" var="msg"/>
 		<p:growl id="outputMsg"/>
+
 		<p:tabView id="tab" styleClass="account" style="font-style: normal;  height: 360px; width: 680px" activeIndex="0" cache="false" >
-			<p:tab title="Minha Conta"><br/>
-				<h:form>
-					<h:outputText value="#{accountBean.person.fullName} - #{accountBean.person.role.title}" style="font-family: Arial; font-size: 14px;"/>
-					<p:separator style="border: 1px solid #ccc;"/> <br/>
-					<h:panelGrid columns="3" columnClasses="my-account-col1,my-account-col2,my-account-col3" styleClass="my-account" style="margin: 10px 0px 20px 0px;" cellpadding="10">
-						<p:column>
-					        <p:graphicImage id="portrait" value="#{accountBean.person.picture}"/><br/>
-							<p:commandLink value="Alterar Foto" onclick="uploadDialog.show()"/>
-						</p:column>
-						<p:column>
-							<h:panelGrid columns="2">
-								<p:outputLabel for="email" value="Email"/>
-								<p:inputText id="email" value="#{accountBean.person.emailAddress}"/>
-								<p:outputLabel for="firstName" value="Primeiro nome"/>
-								<p:inputText id="firstName" value="#{accountBean.person.firstName}"/>
-								<p:outputLabel for="lastName" value="Último nome"/>
-								<p:inputText id="lastName" value="#{accountBean.person.lastName}"/>
-								<p:outputLabel for="birthday" value="Nascimento"/>
-								<p:calendar id="birthday" mode="popup" value="#{accountBean.person.birthday}" pattern="dd/MM/yyyy" 
-											navigator="true" yearRange="c-100:c+100" showButtonPanel="true" lang="pt"/>
-								<p:outputLabel for="male" value="Sexo"/>
-								<p:selectOneMenu id="male" value="#{accountBean.person.gender}">
-									<f:selectItem itemLabel="Masculino" itemValue="true" />
-									<f:selectItem itemLabel="Feminino" itemValue="false" />
-								</p:selectOneMenu>
-							</h:panelGrid>
-						</p:column>
-						<p:column>
-							<p:fieldset legend="Troca de Senha" style="margin-top: 0px; margin-bottom: 10px;">
-								<h:panelGrid columns="2">
-									<p:outputLabel for="pwd" value="Senha Atual" styleClass="my-account"/>
-									<p:password id="pwd" style=" width: 70px; margin-bottom: 10px"/>
-									<p:outputLabel for="newpwd" value="Nova Senha" styleClass="my-account"/>
-									<p:password id="newpwd" style=" width: 70px; margin-bottom: 10px"/>
-									<p:outputLabel for="pwdconf" value="Confirma Nova Senha" styleClass="my-account"/>
-									<p:password id="pwdconf" style="width: 70px; margin-bottom: 10px"/>
-								</h:panelGrid>
-							</p:fieldset>
-						</p:column>
-					</h:panelGrid>
-	
-					<p:commandButton value="Salvar" actionListener="#{accountBean.onSave}" update=":outputMsg" style="float: right; width: 70px; margin: 0px 0px 10px 5px;"/>
-				</h:form>
+			<p:tab id="myAccount" title="#{msg['myaccount']}"><br/>
+				<ui:include src="myAccount.xhtml"/>
 			</p:tab>
 			<p:tab title="Apartamentos">
 				<h:form>
@@ -179,38 +140,42 @@
 			</p:tab>
 		</p:tabView>
 		<h:form id="userForm">
-			<p:dialog header="Novo Usuário" widgetVar="userDialog" draggable="false" resizable="false" modal="true" closable="true" visible="false">
+			<p:dialog header="#{msg['user.signin']}" widgetVar="userDialog" draggable="false" resizable="false" modal="true" closable="true" visible="false">
 				<h:panelGrid id="userGrid" columns="2" columnClasses="left,right" styleClass="user" style="margin: 10px 0px 20px 0px;">
 					<p:column>
-				        <p:graphicImage id="portrait" value="#{accountBean.flatPerson.picture}"/>
-						<p:commandLink value="Alterar Foto" onclick="uploadDialog.show()"/>
+				        <p:graphicImage id="portrait" value="#{accountBean.roleship.person.picture.path}"/>
+						<p:commandLink value="#{msg['user.signin.change.pic']}" onclick="uploadDialog.show()"/>
 					</p:column>
 					<p:column>
 						<h:panelGrid columns="2">
-							<p:outputLabel for="email" value="Email"/>
-							<p:inputText id="email" value="#{accountBean.flatPerson.emailAddress}"/>
-							<p:outputLabel for="firstName" value="Primeiro nome"/>
-							<p:inputText id="firstName" value="#{accountBean.flatPerson.firstName}"/>
-							<p:outputLabel for="lastName" value="Último Nome"/>
-							<p:inputText id="lastName" value="#{accountBean.flatPerson.lastName}"/>
-							<p:outputLabel for="birthday" value="Data de Nascimento"/>
-							<p:calendar id="birthday" mode="popup" value="#{accountBean.flatPerson.birthday}" pattern="dd/MM/yyyy" 
+							<p:outputLabel for="email" value="#{msg['user.signin.email']}"/>
+							<p:inputText id="email" value="#{accountBean.roleship.person.emailAddress}" required="true"/>
+							<p:outputLabel for="firstName" value="#{msg['user.signin.firstname']}"/>
+							<p:inputText id="firstName" value="#{accountBean.roleship.person.firstName}" required="true"/>
+							<p:outputLabel for="lastName" value="#{msg['user.signin.lastname']}"/>
+							<p:inputText id="lastName" value="#{accountBean.roleship.person.lastName}" required="true"/>
+							<p:outputLabel for="birthday" value="#{msg['user.signin.birthday']}"/>
+							<p:calendar id="birthday" mode="popup" value="#{accountBean.roleship.person.birthday}" pattern="dd/MM/yyyy" 
 										navigator="true" yearRange="c-100:c+100" showButtonPanel="true" lang="pt"/>
-							<p:outputLabel for="male" value="Sexo"/>
-							<p:selectOneMenu id="male" value="#{accountBean.flatPerson.gender}">  
+							<p:outputLabel for="male" value="#{msg['user.signin.gender']}"/>
+							<p:selectOneMenu id="male" value="#{accountBean.roleship.person.gender}">  
 								<f:selectItem itemLabel="Masculino" itemValue="true" />
 								<f:selectItem itemLabel="Feminino" itemValue="false" />
+							</p:selectOneMenu>
+						    <p:outputLabel for="role" value="#{msg['user.signin.type']}"/>
+							<p:selectOneMenu id="role" value="#{accountBean.roleship.role}" style="width:100%">  
+								<f:selectItems value="#{accountBean.flatRoles}" var="role" itemLabel="#{role.title}" itemValue="#{role}" />
 							</p:selectOneMenu>
 						</h:panelGrid>
 					</p:column>
 				</h:panelGrid>
-				<p:commandButton value="Salvar" actionListener="#{accountBean.onSave}" update=":outputMsg" oncomplete="userDialog.hide()" style="float: right; width: 70px; margin: 0px 0px 10px 5px;"/>
-				<p:commandButton value="Cancelar" actionListener="#{accountBean.onCancel}" oncomplete="userDialog.hide()" style="float: right; width: 70px; margin: 0px 0px 10px 5px;"/>
+				<p:commandButton value="#{msg['btn.save']}" actionListener="#{accountBean.onSave(roleship.person)}" update=":outputMsg" oncomplete="userDialog.hide()" style="float: right; width: 70px; margin: 0px 0px 10px 5px;"/>
+				<p:commandButton value="#{msg['btn.cancel']}" actionListener="#{accountBean.onCancel(roleship.person)}" oncomplete="userDialog.hide()" style="float: right; width: 70px; margin: 0px 0px 10px 5px;"/>
 			</p:dialog>
 			<p:dialog widgetVar="uploadDialog">
 					<p:fileUpload fileUploadListener="#{accountBean.onUpload}" 
 						allowTypes="/(\.|\/)(gif|jpe?g|png)$/" mode="advanced" showButtons="false" 
-						label="Selecionar Foto" update="portrait,:outputMsg" process="@this" style="width:550px" oncomplete="uploadDialog.hide()"/>			
+						label="#{msg['upload.pic.sel']}Selecionar Foto" update="portrait,:outputMsg" process="@this" style="width:550px" oncomplete="uploadDialog.hide()"/>			
 			</p:dialog>
 		</h:form>
 	</h:body>

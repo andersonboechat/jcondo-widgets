@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+
+<f:view
+	xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:c="http://java.sun.com/jsp/jstl/core"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:p="http://primefaces.org/ui"
+	xmlns:ui="http://java.sun.com/jsf/facelets">
+
+	<h:form>
+		<h:panelGrid columns="3" styleClass="menu-cmds" columnClasses="menu-cmds-col1,menu-cmds-col2,menu-cmds-col3">
+			<p:commandButton value="#{msg['usrs.add.user']}" actionListener="#{accountBean.onCreate}" 
+							partialSubmit="true" process="@this" oncomplete="userDialog.show()" disabled="#{accountBean.canAddPeople() == false}"/>
+			<p:commandButton value="#{msg['usrs.del.user']}" actionListener="#{accountBean.onRemove}" 
+							partialSubmit="true" process="@this,dataTable" update="dataTable,:outputMsg"/>
+			<p:selectOneMenu id="flat" var="flat" value="#{accountBean.flat}" style="float: right">
+				<f:selectItems value="#{accountBean.flats}" itemLabel="#{flat.name}" itemValue="#{flat}"/>
+			    <p:ajax event="change" listener="#{accountBean.onSelectFlat}" update="dataTable"/>
+			</p:selectOneMenu>
+		</h:panelGrid>
+		<p:dataTable id="dataTable" var="roleship" value="#{accountBean.model}"  
+		             paginator="true" rows="5" paginatorPosition="bottom" 
+		             paginatorTemplate="{CurrentPageReport} {PreviousPageLink} {PageLinks} {NextPageLink}" 
+		             selection="#{accountBean.roleships}" rowKey="#{roleship.person.id}" >
+		    <p:ajax event="page" partialSubmit="true" process="name"/>
+		    
+		    <f:facet name="header">Usuarios</f:facet>
+	
+			<p:column selectionMode="multiple" style="width:2%" disabledSelection="#{accountBean.hasPermission(roleship.person) == false}"/>
+	
+		    <p:column id="name" headerText="#{msg['usrs.name']}" style="width:76%" >
+		        <h:outputText value="#{roleship.person.fullName}" />
+		    </p:column>
+	
+		    <p:column id="role" headerText="#{msg['usrs.type']}" style="width:20%">
+				<p:selectOneMenu id="sel1" value="#{roleship.role}" valueChangeListener="#{accountBean.onSelectRole}" 
+					style="width:100%" disabled="#{accountBean.hasPermission(roleship.person) == false}">  
+					<f:selectItems value="#{accountBean.flatRoles}" var="role" itemLabel="#{role.title}" itemValue="#{role}" />
+					<p:ajax event="change" update=":outputMsg"/>
+				</p:selectOneMenu>
+		    </p:column>
+	
+			<p:column headerText="#{msg['usrs.edit']}" style="width:2%">
+				<p:commandLink value="Editar" actionListener="#{accountBean.onEdit(roleship.person.id)}" 
+								update=":userForm:userGrid" disabled="#{accountBean.hasPermission(roleship.person) == false}"
+								oncomplete="userDialog.show();" partialSubmit="true" process="@this"/>
+			</p:column>
+		</p:dataTable>
+	</h:form>
+</f:view>

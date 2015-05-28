@@ -32,7 +32,7 @@
 		</p:ajaxStatus>
 
 		<p:tabView id="tab" styleClass="agenda" style="font-style: normal;" activeIndex="0" cache="false">
-			<p:tab title="Reservas">
+			<p:tab title="#{msg['main.lbl.bookings']}">
 				<p:tabView id="tabs">
 					<p:ajax event="tabChange" listener="#{calendarBean.onTabChange}"/>
 					<c:forEach var="room" items="#{calendarBean.rooms}" varStatus="i">
@@ -50,7 +50,7 @@
 					</c:forEach>
 				</p:tabView>
 			</p:tab>
-			<p:tab title="Relatórios">
+			<p:tab title="#{msg['main.lbl.reports']}">
 			</p:tab>
 		</p:tabView>
 	</h:body>

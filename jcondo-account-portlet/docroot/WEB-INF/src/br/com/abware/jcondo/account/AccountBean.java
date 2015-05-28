@@ -2,8 +2,8 @@ package br.com.abware.jcondo.account;
 
 import java.io.File;
 import java.io.Serializable;
+import java.net.URL;
 import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.List;
 import java.util.Locale;
 import java.util.ResourceBundle;
@@ -13,10 +13,8 @@ import javax.ejb.EJB;
 import javax.faces.application.FacesMessage;
 import javax.faces.bean.ManagedBean;
 import javax.faces.bean.ViewScoped;
-import javax.faces.context.FacesContext;
 import javax.faces.event.AjaxBehaviorEvent;
 import javax.faces.event.ValueChangeEvent;
-import javax.portlet.PortletContext;
 
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.io.FileUtils;
@@ -30,6 +28,7 @@ import br.com.abware.jcondo.core.Permission;
 import br.com.abware.jcondo.core.RoleType;
 import br.com.abware.jcondo.core.model.Domain;
 import br.com.abware.jcondo.core.model.Flat;
+import br.com.abware.jcondo.core.model.Image;
 import br.com.abware.jcondo.core.model.Person;
 import br.com.abware.jcondo.core.model.Role;
 import br.com.abware.jcondo.core.service.FlatService;
@@ -58,7 +57,8 @@ public class AccountBean implements Serializable {
 	
 	private PersonDataModel model;
 
-	private List<PersonDataModel> models;
+	/** cache das tabelas carregadas */
+	private List<RoleshipDataModel> models;
 
 	/** apartamento selecionado */
 	private Flat flat;
@@ -68,16 +68,6 @@ public class AccountBean implements Serializable {
 
 	/** usuario logado */
 	private Person person;
-	
-	private PersonData data;
-	
-	/** usuario sendo alterado ou criado */
-	private Person flatPerson;
-	
-	private List<Person> flatPeople;
-	
-	/** papeis possiveis para um apartamento */
-	private List<Role<? extends Domain>> flatRoles;
 
 	@PostConstruct
 	public void init() {
@@ -92,31 +82,33 @@ public class AccountBean implements Serializable {
 				//setModel(new PersonDataModel(new ArrayList<Person>()));
 			}
 
-			flatRoles = roleService.getRoles(Flat.class);
-
 		} catch (ApplicationException e) {
 			LOGGER.fatal("Falha ao inicializar bean", e);
 		}
 	}
 	
-	@SuppressWarnings("unchecked")
 	private void buildModel() throws ApplicationException {
-		List<PersonData> datas = new ArrayList<PersonData>();
-
-		for (Person person : personService.getPeople(flat)) {
-			datas.add(new PersonData(person, flat, roleService.getRole(person, flat)));
-		}
-
-		model = new PersonDataModel(flat, datas);
-		models.add(model);
+//		List<Roleship> roleships = new ArrayList<Roleship>();
+//
+//		for (Person person : personService.getPeople(flat)) {
+//			for (Roleship roleship : person.getRoleships()) {
+//				if (flat.equals(roleship.getOrganization())) {
+//					roleships.add(roleship);
+//				}
+//			}
+//			
+//		}
+//
+//		model = new RoleshipDataModel(flat, roleships);
+//		models.add(model);
 	}
 
 	public boolean canAddPeople() {
-		try {
-			return personService.hasPermission(null, Permission.ADD_USER);
-		} catch (ApplicationException e) {
-			LOGGER.error(e.getMessage(), e);
-		}
+//		try {
+//			return personService.hasPermission(null, Permission.ADD_USER);
+//		} catch (ApplicationException e) {
+//			LOGGER.error(e.getMessage(), e);
+//		}
 
 		return false;
 	}	
@@ -132,62 +124,62 @@ public class AccountBean implements Serializable {
 	}
 
 	public void onSelectRole(ValueChangeEvent event) {
-		Role role = (Role) event.getNewValue();
-		Person person = model.getRowData().getPerson();
-		try {
-			roleService.save(person, role);
-		} catch (ApplicationException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+//		Role role = (Role) event.getNewValue();
+//		Roleship data = model.getRowData();
+//		Person person = data.getPerson();
+//		try {
+//			roleService.save(person, role);
+//			data.setRole(role);
+//		} catch (ApplicationException e) {
+//			// TODO Auto-generated catch block
+//			e.printStackTrace();
+//		}
 	}
 	
 	public void onSelectFlat(AjaxBehaviorEvent event) {
-		try {
-			int i;
-
-			if ((i = models.indexOf(new PersonDataModel(flat, null))) < 0) {
-				buildModel();
-			} else {
-				model.setWrappedData(models.get(i));
-			}
-
-		} catch (Exception e) {
-			LOGGER.error("Unexpected Failure", e);
-			MessageUtils.addMessage(FacesMessage.SEVERITY_FATAL, "register.runtime.failure", null);
-		}
+//		try {
+//			int i;
+//
+//			if ((i = models.indexOf(new RoleshipDataModel(flat, null))) < 0) {
+//				buildModel();
+//			} else {
+//				model = models.get(i);
+//			}
+//
+//		} catch (Exception e) {
+//			LOGGER.error("Unexpected Failure", e);
+//			MessageUtils.addMessage(FacesMessage.SEVERITY_FATAL, "register.runtime.failure", null);
+//		}
 	}
 	
-	public void onSave(AjaxBehaviorEvent event) {
-		try {
-			boolean isNew = data.getPerson().getId() == 0 ? true : false; 
-			Person person = personService.register(data.getPerson());
-			data.setPerson(person);
-
-			if (isNew) {
-				model.add(data);
-				MessageUtils.addMessage(FacesMessage.SEVERITY_INFO, "flats.user.add.success", null);
-			} else {
-				MessageUtils.addMessage(FacesMessage.SEVERITY_INFO, "global.sucess", null);
-			}
-		} catch (ApplicationException e) {
-			LOGGER.error(e.getMessage(), e);
-			//FacesContext.getCurrentInstance().addMessage(null, new FacesMessage(FacesMessage.SEVERITY_FATAL, e.getLocalizedMessage(), null));
-			MessageUtils.addMessage(FacesMessage.SEVERITY_FATAL, e.getLocalizedMessage(), null);
-		} catch (Exception e) {
-			LOGGER.error("Unexpected Failure", e);
-			MessageUtils.addMessage(FacesMessage.SEVERITY_FATAL, "register.runtime.failure", null);
-		}
+	public void onSave(Person person) {
+//		try {
+//			Person p = personService.register(person);
+//			roleship.setPerson(p);
+//
+//			if (person.getId() == 0) {
+//				model.add(roleship);
+//				MessageUtils.addMessage(FacesMessage.SEVERITY_INFO, "flats.user.add.success", null);
+//			} else {
+//				MessageUtils.addMessage(FacesMessage.SEVERITY_INFO, "global.sucess", null);
+//			}
+//		} catch (ApplicationException e) {
+//			LOGGER.error(e.getMessage(), e);
+//			//FacesContext.getCurrentInstance().addMessage(null, new FacesMessage(FacesMessage.SEVERITY_FATAL, e.getLocalizedMessage(), null));
+//			MessageUtils.addMessage(FacesMessage.SEVERITY_FATAL, e.getLocalizedMessage(), null);
+//		} catch (Exception e) {
+//			LOGGER.error("Unexpected Failure", e);
+//			MessageUtils.addMessage(FacesMessage.SEVERITY_FATAL, "register.runtime.failure", null);
+//		}
 	}
 
 	public void onCreate() {
-		//flatPerson = new Person();
-		data = new PersonData(new Person(), flat, null);
+
 	}
 
 	public void onEdit(String rowKey) {
 		try {
-			data = model.getRowData(rowKey);
+
 		} catch (Exception e) {
 			LOGGER.error("Unexpected Failure", e);
 			MessageUtils.addMessage(FacesMessage.SEVERITY_FATAL, "register.runtime.failure", null);
@@ -201,31 +193,34 @@ public class AccountBean implements Serializable {
 	public void onUpload(FileUploadEvent event) {
 		try {
 			UploadedFile uploadedFile = event.getFile();
-			PortletContext portletContext = (PortletContext) FacesContext.getCurrentInstance().getExternalContext().getContext();
-
-			String portraitPath = "/temp/" + Calendar.getInstance().getTimeInMillis() + "." + FilenameUtils.getExtension(uploadedFile.getFileName());
-			File portraitFile = new File(portraitPath);
-			FileUtils.copyInputStreamToFile(uploadedFile.getInputstream(), portraitFile);
 			
-			
+			File temp = File.createTempFile("usr_pic_", FilenameUtils.getExtension(uploadedFile.getFileName()), new File("/temp/"));
+			FileUtils.copyInputStreamToFile(uploadedFile.getInputstream(), temp);
 
-			personService.setPortrait(portraitFile);
+			Person person;
+			String clientId = null;
+
+			if ("myAccount".equalsIgnoreCase(clientId)) {
+				person = this.person;
+			} else {
+
+			}			
+
 		} catch (Exception e) {
 			LOGGER.error("Unexpected Failure", e);
 			MessageUtils.addMessage(FacesMessage.SEVERITY_FATAL, "register.runtime.failure", null);
 		}
 	}
 
-	public void onCancel() {
-		
-	}
-
-	public PersonDataModel getModel() {
-		return model;
-	}
-
-	public void setModel(PersonDataModel model) {
-		this.model = model;
+	public void onCancel(Person person) {
+		try {
+			if (person.getPicture() != null && person.getPicture().getId() == 0) {
+				FileUtils.deleteQuietly(new File(new URL(person.getPicture().getPath()).toURI()));
+			}
+		} catch (Exception e) {
+			LOGGER.error("Unexpected Failure", e);
+			MessageUtils.addMessage(FacesMessage.SEVERITY_FATAL, "register.runtime.failure", null);
+		}
 	}
 
 	public Person getPerson() {
@@ -234,14 +229,6 @@ public class AccountBean implements Serializable {
 
 	public void setPerson(Person person) {
 		this.person = person;
-	}
-
-	public Person getFlatPerson() {
-		return flatPerson;
-	}
-
-	public void setFlatPerson(Person flatPerson) {
-		this.flatPerson = flatPerson;
 	}
 
 	public Flat getFlat() {
@@ -260,19 +247,4 @@ public class AccountBean implements Serializable {
 		this.flats = flats;
 	}
 
-	public List<Person> getFlatPeople() {
-		return flatPeople;
-	}
-
-	public void setFlatPeople(List<Person> flatPeople) {
-		this.flatPeople = flatPeople;
-	}
-
-	public List<Role> getFlatRoles() {
-		return flatRoles;
-	}
-
-	public void setFlatRoles(List<Role> flatRoles) {
-		this.flatRoles = flatRoles;
-	}
 }

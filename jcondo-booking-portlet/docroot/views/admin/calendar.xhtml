@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+
+<f:view xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:c="http://java.sun.com/jsp/jstl/core"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:p="http://primefaces.org/ui"
+	xmlns:ui="http://java.sun.com/jsf/facelets">
+	<h:form id="calendar-form-#{tabIndex}">
+		<p:schedule id="calendar-#{tabIndex}" value="#{calendarBean.getModel(i.index)}" editable="true" widgetVar="calendar-#{tabIndex}" 
+					locale="pt" draggable="false" resizable="false" styleClass="agenda" aspectRatio="0.9" 
+					leftHeaderTemplate="prev" centerHeaderTemplate="title" rightHeaderTemplate="next">
+			<p:ajax event="dateSelect" listener="#{calendarBean.onDateSelect}" 
+					update=":tab:tabs:booking-dialog-form-#{tabIndex}:bookingDetails" oncomplete="PF('bookingDialog-#{tabIndex}').show();" />
+			<p:ajax event="eventSelect" listener="#{calendarBean.onBookingSelect}" 
+					update=":tab:tabs:event-dialog-form-#{tabIndex}:eventDetails" oncomplete="PF('eventDialog-#{tabIndex}').show();" />
+		</p:schedule>
+	</h:form>
+</f:view>

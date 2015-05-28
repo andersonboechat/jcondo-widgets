@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+
+<f:view xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:c="http://java.sun.com/jsp/jstl/core"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:p="http://primefaces.org/ui"
+	xmlns:ui="http://java.sun.com/jsf/facelets">
+	<h:form id="room-form-#{tabIndex}">
+		<h:panelGrid columns="2" title="#{msg['room.name']}">
+			<h:outputLabel value="#{msg['room.name']}"/>
+			<h:outputText value="#{calendarBean.room.name}"/>
+			<h:outputLabel value="#{msg['room.agreement']}"/>
+			<h:outputText value="#{calendarBean.room.agreement}"/>
+			<h:outputLabel value="#{msg['room.price']}"/>
+			<h:outputText value="#{calendarBean.room.price}"/>
+			<h:outputLabel value="#{msg['room.available']}"/>
+			<h:selectBooleanCheckbox value="#{calendarBean.room.available}" />
+			<h:outputLabel value="#{msg['room.description']}"/>
+			<h:inputTextarea value="#{calendarBean.room.description}"/>
+		</h:panelGrid>
+
+		<h:panelGrid columns="2" title="#{msg['room.images']}">
+			<h:outputLabel value="#{msg['room.image.folder']}"/>
+			<h:outputText value="#{calendarBean.room.price}"/>
+			<p:column colspan="2">
+				<h:panelGrid columns="4">
+				    <ui:repeat value="#{calendarBean.room.images}" var="image">
+				        <p:graphicImage name="${image.path}" id="image">
+				        	<p:ajax event="click" update="imageSwitcher" oncomplete="PF('imagesDialog').show();"></p:ajax>
+				        </p:graphicImage>
+				    </ui:repeat>
+				</h:panelGrid>
+			</p:column>
+		</h:panelGrid>
+
+		<p:dialog header="#{msg['room.images']}" widgetVar="imagesDialog" modal="true" draggable="false" resizable="false">
+			<p:commandButton type="button" onclick="PF('imageSwitcher').previous();" icon="ui-icon-circle-triangle-w" id="prev"/>
+			<p:commandButton type="button" onclick="PF('imageSwitcher').next();" icon="ui-icon-circle-triangle-e" id="next"/>
+			<p:imageSwitch effect="wipe" widgetVar="imageSwitcher" id="imageSwitcher" slideshowAuto="false" >
+			    <ui:repeat value="#{calendarBean.room.images}" var="image">
+			        <p:graphicImage name="${image.path}" id="image"/>
+			    </ui:repeat>
+			</p:imageSwitch>
+		</p:dialog>
+	</h:form>
+</f:view>
