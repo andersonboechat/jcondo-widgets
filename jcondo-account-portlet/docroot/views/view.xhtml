@@ -144,7 +144,7 @@
 						    <p:ajax event="change" listener="#{accountBean.onSelectFlat}" update="dataTable"/>
 						</p:selectOneMenu>
 					</h:panelGrid>
-					<p:dataTable id="dataTable" var="person" value="#{accountBean.model}"  
+					<p:dataTable id="dataTable" var="model" value="#{accountBean.model}"  
 					             paginator="true" rows="5" paginatorPosition="bottom" 
 					             paginatorTemplate="{CurrentPageReport} {PreviousPageLink} {PageLinks} {NextPageLink}" 
 					             selection="#{accountBean.flatPeople}" rowKey="#{person.id}" >
@@ -152,15 +152,15 @@
 					    
 					    <f:facet name="header">Usuarios</f:facet>
 
-						<p:column selectionMode="multiple" style="width:2%" disabledSelection="#{accountBean.hasPermission(person) == false}"/>
+						<p:column selectionMode="multiple" style="width:2%" disabledSelection="#{accountBean.hasPermission(model.person) == false}"/>
 
 					    <p:column id="name" headerText="Nome" style="width:76%" >
-					        <h:outputText value="#{person.fullName}" />
+					        <h:outputText value="#{model.person.fullName}" />
 					    </p:column>
 
 					    <p:column id="role" headerText="Tipo" style="width:20%">
-							<p:selectOneMenu id="sel1" value="#{accountBean.getRole(person)}" valueChangeListener="#{accountBean.onSelectRole}" 
-								style="width:100%" disabled="#{accountBean.hasPermission(person) == false}">  
+							<p:selectOneMenu id="sel1" value="#{model.role.id}" valueChangeListener="#{accountBean.onSelectRole}" 
+								style="width:100%" disabled="#{accountBean.hasPermission(model.person)}">  
 								<f:selectItems value="#{accountBean.flatRoles}" 
 												var="role" itemLabel="#{role.title}" itemValue="#{role.id}" />
 								<p:ajax event="change" update=":outputMsg"/>
@@ -168,8 +168,8 @@
 					    </p:column>
 
 						<p:column headerText="Editar" style="width:2%">
-							<p:commandLink value="Editar" actionListener="#{accountBean.onEdit(person.id)}" 
-											update=":userForm:userGrid" disabled="#{accountBean.hasPermission(person) == false}"
+							<p:commandLink value="Editar" actionListener="#{accountBean.onEdit(model.person.id)}" 
+											update=":userForm:userGrid" disabled="#{accountBean.hasPermission(model.person) == false}"
 											oncomplete="userDialog.show();" partialSubmit="true" process="@this"/>
 						</p:column>
 					</p:dataTable>

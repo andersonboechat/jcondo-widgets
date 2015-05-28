@@ -1,6 +1,6 @@
 package br.com.abware.jcondo.account;
 
-import br.com.abware.jcondo.core.model.Flat;
+import br.com.abware.jcondo.core.model.Domain;
 import br.com.abware.jcondo.core.model.Person;
 import br.com.abware.jcondo.core.model.Role;
 
@@ -8,14 +8,14 @@ public class PersonData {
 
 	private Person person;
 
-	private Flat flat;
+	private Domain domain;
 
-	private Role role;
+	private Role<? extends Domain> role;
 	
-	public PersonData(Person person, Flat flat, Role role) {
-		this.setPerson(person);
-		this.setFlat(flat);
-		this.setRole(role);
+	public PersonData(Person person, Domain domain, Role<? extends Domain> role) {
+		this.person = person;
+		this.domain = domain;
+		this.role = role;
 	}
 
 	public Person getPerson() {
@@ -26,19 +26,19 @@ public class PersonData {
 		this.person = person;
 	}
 
-	public Flat getFlat() {
-		return flat;
+	public Domain getDomain() {
+		return domain;
 	}
 
-	public void setFlat(Flat flat) {
-		this.flat = flat;
+	public void setDomain(Domain domain) {
+		this.domain = domain;
 	}
 
-	public Role getRole() {
+	public Role<? extends Domain> getRole() {
 		return role;
 	}
 
-	public void setRole(Role role) {
+	public void setRole(Role<? extends Domain> role) {
 		this.role = role;
 	}
 

@@ -1,0 +1,5 @@
+Manifest-Version: 1.0
+Dependencies: org.apache.commons.configuration
+Class-Path: lifecondo.jar 
+ jcondo-api.jar
+

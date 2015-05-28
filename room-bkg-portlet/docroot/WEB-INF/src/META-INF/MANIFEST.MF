@@ -1,0 +1,2 @@
+Manifest-Version: 1.0
+Dependencies: com.sun.jsf-impl:main, org.apache.log4j:main, org.apache.commons.configuration:main, br.com.jcondo:main, javax.annotation.api:main

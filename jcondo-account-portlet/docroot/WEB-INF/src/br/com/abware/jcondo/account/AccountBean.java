@@ -28,6 +28,7 @@ import org.primefaces.model.UploadedFile;
 
 import br.com.abware.jcondo.core.Permission;
 import br.com.abware.jcondo.core.RoleType;
+import br.com.abware.jcondo.core.model.Domain;
 import br.com.abware.jcondo.core.model.Flat;
 import br.com.abware.jcondo.core.model.Person;
 import br.com.abware.jcondo.core.model.Role;
@@ -54,7 +55,7 @@ public class AccountBean implements Serializable {
 	
 	@EJB(lookup="java:global/jcondo/jcondo-impl/roleService")
 	private RoleService roleService;
-
+	
 	private PersonDataModel model;
 
 	private List<PersonDataModel> models;
@@ -76,7 +77,7 @@ public class AccountBean implements Serializable {
 	private List<Person> flatPeople;
 	
 	/** papeis possiveis para um apartamento */
-	private List<Role> flatRoles;
+	private List<Role<? extends Domain>> flatRoles;
 
 	@PostConstruct
 	public void init() {
@@ -91,7 +92,7 @@ public class AccountBean implements Serializable {
 				//setModel(new PersonDataModel(new ArrayList<Person>()));
 			}
 
-			flatRoles = roleService.getRoles(RoleType.FLAT_ROLE);
+			flatRoles = roleService.getRoles(Flat.class);
 
 		} catch (ApplicationException e) {
 			LOGGER.fatal("Falha ao inicializar bean", e);
